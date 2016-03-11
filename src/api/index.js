@@ -2,12 +2,13 @@
 
 //enables express
 var express = require('express');
+var todos = require('../../mock/todos.json')
 
 //map express.Router to 'router'
 var router = express.Router();
 
 router.get('/todos', function(req, res) {
-  res.json({todos:[]});
+  res.json({todos: todos});
 });
 
 /*
