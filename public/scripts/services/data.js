@@ -3,7 +3,7 @@
 angular.module('todoListApp')
 .service('dataService', function($http) {
   this.getTodos = function(cb) {
-    $http.get('/api/todos').then(cb);
+    $http.get('/mock/todos.json').then(cb);
   };
   
   this.deleteTodo = function(todo) {
