@@ -8,6 +8,7 @@ webpackJsonp([0],[
 
 	angular.module('todoListApp', []);
 
+	// Uses Webpack to load these scripts into 'public/scripts/todo.bundle.js'
 	__webpack_require__(3);
 	__webpack_require__(4);
 	__webpack_require__(5);
@@ -61,7 +62,14 @@ webpackJsonp([0],[
 	        return todo
 	      };
 	    })
-	    dataService.saveTodos(filteredTodos);
+	    dataService.saveTodos(filteredTodos)
+	    .finally($scope.resetTodoState());
+	  };
+
+	  $scope.resetTodoState = function() {
+	    $scope.todos.forEach(function(todo) {
+	      todo.edited = false;
+	    });
 	  };
 	});
 
@@ -93,7 +101,7 @@ webpackJsonp([0],[
 	var angular = __webpack_require__(1);
 
 	angular.module('todoListApp')
-	.service('dataService', function($http) {
+	.service('dataService', function($http, $q) {
 	  this.getTodos = function(cb) {
 	    // Looks in route set up in express router in 'src/api/index.js'
 	    $http.get('/api/todos').then(cb);
@@ -104,7 +112,22 @@ webpackJsonp([0],[
 	  };
 
 	  this.saveTodos = function(todos) {
-	    console.log("I saved " + todos.length + " todos!");
+	    var queue = [];
+	    todos.forEach(function(todo) {
+	      var request;
+	      if(!todo._id) {
+	        request = $http.post('/api/todos', todo)
+	      } else {
+	        request = $http.put('/api/todos/' + todo._id, todo).then(function(result) {
+	          todo = result.data.todo;
+	          return todo;
+	        })
+	      };
+	      queue.push(request);
+	    });
+	    return $q.all(queue).then(function(results) {
+	      console.log('I saved ' + todos.length +" todos!");
+	    });
 	  };
 
 	});
